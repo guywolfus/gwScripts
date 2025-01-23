@@ -1,0 +1,34 @@
+{
+    "tool_name": "Comet Rename Plus+",
+    "window_width": 280,
+    "window_height": 331,
+
+    "btn_replace": "Search and Replace",
+    "btn_prefix": "Add Prefix",
+    "btn_suffix": "Add Suffix",
+    "btn_rename": "Rename and Number",
+
+    "lnedits_limit": {
+        "0": 10,
+        "1": 1000000000
+    },
+    "lnedits_text": {
+        "0": "0",
+        "1": "1"
+    },
+    "lnedits_width": 64,
+    "labels_width": 48,
+    "search": "Search:",
+    "replace": "Replace:",
+    "prefix": "Prefix:",
+    "suffix": "Suffix:",
+    "rename": "Rename:",
+    "start_num": "Start #:",
+    "padding": "Padding:",
+
+    "search_missing_error": "Search text can't be empty. Operation canceled.",
+    "prefix_missing_warning": "Prefix text can't be empty.",
+    "suffix_missing_warning": "Suffix text can't be empty.",
+    "name_name_missing_warning": "Rename text can't be empty.",
+    "no_objects_selected_warning": "No objects selected."
+}
