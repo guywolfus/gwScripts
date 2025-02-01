@@ -1,2 +1,6 @@
+# python
 __pycache__/
 *.pyc
+
+# media files for icons, promo art, etc.
+*.media

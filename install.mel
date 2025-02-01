@@ -1,0 +1,42 @@
+global proc installModule() {
+    // get the path where this MEL file was dropped
+    string $currentScript = `whatIs "installModuleScriptPath"`;
+    if (`gmatch $currentScript "Mel procedure found in: *"`) {
+
+        // extract the necessary variables
+        string $fullPath = `substitute "Mel procedure found in: " $currentScript ""`;
+        string $scriptDir = `dirname $fullPath`;
+        string $_splitPath[];
+        string $_tokenize = `tokenize $scriptDir "/" $_splitPath`;
+        string $moduleName = $_splitPath[size($_splitPath) - 1];
+
+        // define the ".mod" file path and content
+        string $modFilePath = (`internalVar -userAppDir` + "modules/" + $moduleName + ".mod");
+        string $modContent = "+ " + $moduleName + " 1.0 " + $scriptDir;
+
+        // verify the modules directory exists
+        string $modulesDir = `dirname($modFilePath)`;
+        if (!`filetest -d $modulesDir`) {
+            sysFile -makeDir $modulesDir;
+        }
+
+        // write the ".mod" file
+        int $fileId = `fopen $modFilePath "w"`;
+        if ($fileId == 0) {
+            error ("Failed to create \".mod\" file: " + $modFilePath);
+        }
+        fprint $fileId $modContent;
+        fclose $fileId;
+
+        print ("Successfully created module: " + $modFilePath + "\n");
+    } else {
+        error "Could not determine the path of the dropped file.";
+    }
+}
+
+// throwaway function to initialize the path of this script file
+global proc installModuleScriptPath() {}
+installModuleScriptPath();
+
+// call the function automatically
+installModule();
