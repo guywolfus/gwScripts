@@ -1,5 +1,5 @@
 
-from ..core.shots import Shots
+from gwScripts.tools.shots_data_manager.core.shots import Shots
 from gwScripts import utils
 
 import maya.cmds as cmds
@@ -63,7 +63,7 @@ class Controller():
             try:
                 cmds.setKeyframe(anim_curve, t=[start_frame, end_frame], itt='linear', ott='linear')
             except:
-                utils.general.LOGGER.warning("Skipping \"{}\": couldn\'t set a keyframe on it.".format(anim_curve))
+                utils.LOGGER.warning("Skipping \"{}\": couldn\'t set a keyframe on it.".format(anim_curve))
 
         # if needed, delete keys before and after the cut frames
         if anim_keyframes[0] < start_frame:

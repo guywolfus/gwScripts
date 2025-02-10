@@ -1,5 +1,5 @@
 
-from .. import core
+from gwScripts.tools.comet_rename_plus import core
 from gwScripts import utils
 
 import maya.cmds as cmds
@@ -149,7 +149,7 @@ class Window(utils.dialog.Dialog):
             hlayout.addStretch()
         return hlayout
 
-    @utils.general.undo_chunk
+    @utils.helpers.undo_chunk
     def add_prefix(self):
         """
         Adds the prefix text to the selected nodes.
@@ -159,14 +159,14 @@ class Window(utils.dialog.Dialog):
         """
         prefix = self.lnedit_prefix.text()
         if not prefix:
-            utils.general.LOGGER.warning(self.settings.get('prefix_missing_warning'))
+            utils.LOGGER.warning(self.settings.get('prefix_missing_warning'))
             return
         if not cmds.ls(sl=True):
-            utils.general.LOGGER.warning(self.settings.get('no_objects_selected_warning'))
+            utils.LOGGER.warning(self.settings.get('no_objects_selected_warning'))
             return
         core.add_prefix(prefix)
 
-    @utils.general.undo_chunk
+    @utils.helpers.undo_chunk
     def add_suffix(self):
         """
         Adds the suffix text to the selected nodes.
@@ -176,14 +176,14 @@ class Window(utils.dialog.Dialog):
         """
         suffix = self.lnedit_suffix.text()
         if not suffix:
-            utils.general.LOGGER.warning(self.settings.get('suffix_missing_warning'))
+            utils.LOGGER.warning(self.settings.get('suffix_missing_warning'))
             return
         if not cmds.ls(sl=True):
-            utils.general.LOGGER.warning(self.settings.get('no_objects_selected_warning'))
+            utils.LOGGER.warning(self.settings.get('no_objects_selected_warning'))
             return
         core.add_suffix(suffix)
 
-    @utils.general.undo_chunk
+    @utils.helpers.undo_chunk
     def search_and_replace(self):
         """
         Searches and replaces the texts for the selected nodes.
@@ -194,14 +194,14 @@ class Window(utils.dialog.Dialog):
         search = self.lnedit_search.text()
         replace = self.lnedit_replace.text()
         if not search:
-            utils.general.LOGGER.error(self.settings.get('search_missing_error'))
+            utils.LOGGER.error(self.settings.get('search_missing_error'))
             return
         if not cmds.ls(sl=True):
-            utils.general.LOGGER.warning(self.settings.get('no_objects_selected_warning'))
+            utils.LOGGER.warning(self.settings.get('no_objects_selected_warning'))
             return
         core.search_and_replace(search, replace)
 
-    @utils.general.undo_chunk
+    @utils.helpers.undo_chunk
     def rename_and_number(self):
         """
         Renames and renumbers the selected nodes.
@@ -211,10 +211,10 @@ class Window(utils.dialog.Dialog):
         """
         new_name = self.lnedit_rename.text()
         if not new_name:
-            utils.general.LOGGER.warning(self.settings.get('name_name_missing_warning'))
+            utils.LOGGER.warning(self.settings.get('name_name_missing_warning'))
             return
         if not cmds.ls(sl=True):
-            utils.general.LOGGER.warning(self.settings.get('no_objects_selected_warning'))
+            utils.LOGGER.warning(self.settings.get('no_objects_selected_warning'))
             return
         start_num = int(self.lnedit_start_num.text())
         padding = int(self.lnedit_padding.text())

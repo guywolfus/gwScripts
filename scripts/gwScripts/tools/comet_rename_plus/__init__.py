@@ -1,6 +1,5 @@
 
-from .ui.window import Window
-from .ui.controller import Controller
+from gwScripts.tools.comet_rename_plus.ui.window import Window
 
 import sys
 
@@ -23,6 +22,6 @@ def run(reset=False):
         self.window = None
 
     if not self.window:
-        self.window = Window(controller=Controller)
+        self.window = Window()
 
     self.window.display_ui()

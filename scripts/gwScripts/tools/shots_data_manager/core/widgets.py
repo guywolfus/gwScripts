@@ -1,5 +1,5 @@
 
-from .shots import Shots
+from gwScripts.tools.shots_data_manager.core.shots import Shots
 
 try:
     from PySide6 import QtWidgets

@@ -1,6 +1,6 @@
 
-from ..core.preset import Preset
-from ..core.widgets import NumericDelegate, Table
+from gwScripts.tools.shots_data_manager.core.preset import Preset
+from gwScripts.tools.shots_data_manager.core.widgets import NumericDelegate, Table
 from gwScripts import utils
 
 import os
@@ -319,8 +319,8 @@ class Window(utils.dialog.Dialog):
         try:
             self.shots_data_table.populate(preset.shots)
         except Exception as e:
-            utils.general.LOGGER.error(e)
-            utils.general.LOGGER.error(self.settings.get('load_preset_shots_data_error'))
+            utils.LOGGER.error(e)
+            utils.LOGGER.error(self.settings.get('load_preset_shots_data_error'))
 
         # set the GUI fields to match the preset
         self.rename_shots_name_edt.setText(preset.rename_shots_name)
@@ -349,10 +349,10 @@ class Window(utils.dialog.Dialog):
         :rtype: None
         """
         if not cmds.ls(sl=True):
-            utils.general.LOGGER.error(self.settings.get('no_object_selected_error') + self.settings.get('select_keyframes_error'))
+            utils.LOGGER.error(self.settings.get('no_object_selected_error') + self.settings.get('select_keyframes_error'))
             return
         if not self.controller.get_keys_on_selected():
-            utils.general.LOGGER.error(self.settings.get('no_keyframes_error') + self.settings.get('select_keyframes_error'))
+            utils.LOGGER.error(self.settings.get('no_keyframes_error') + self.settings.get('select_keyframes_error'))
             return
 
         if self.shots_data_table.shots_data and not self.confirmation_dialog(
@@ -449,8 +449,8 @@ class Window(utils.dialog.Dialog):
 
         # finalize
         cmds.file(main_file, force=True, loadReferenceDepth="all")
-        utils.general.open_dir(self._export_path)
-        utils.general.LOGGER.info(self.settings.get('export_shots_confirm'))
+        utils.helpers.open_dir(self._export_path)
+        utils.LOGGER.info(self.settings.get('export_shots_confirm'))
 
     def _update_shot_name_display(self):
         """
@@ -469,11 +469,11 @@ class Window(utils.dialog.Dialog):
         try:
             self.rename_shots_apply_lbl.setText("e.g. \"{}\", \"{}\", \"{}\"...".format(eg1, eg2, eg3))
             if self._unicode_error:
-                utils.general.LOGGER.info("")
+                utils.LOGGER.info("")
                 self._unicode_error = False
         except UnicodeEncodeError:
             if not self._unicode_error:
-                utils.general.LOGGER.error(self.settings.get('shot_name_display_error'))
+                utils.LOGGER.error(self.settings.get('shot_name_display_error'))
                 self._unicode_error = True
 
     def _update_normalize_frames(self):
@@ -514,7 +514,7 @@ class Window(utils.dialog.Dialog):
         """
         Internal for valid shots' naming conventions.
         """
-        name = utils.general.validate_string(
+        name = utils.helpers.validate_string(
             input_str=self.rename_shots_name_edt.text(),
             replace_with="_"
         )

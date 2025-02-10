@@ -1,5 +1,5 @@
 
-from . import core
+from gwScripts.tools.follow_camera import core
 from gwScripts import utils
 
 import sys
@@ -27,7 +27,7 @@ def run():
         # verify user input
         selection = cmds.ls(sl=True, typ='transform')
         if not selection:
-            utils.general.LOGGER.error("No objects selected, please select an object to create a FollowCamera for.")
+            utils.LOGGER.error("No objects selected, please select an object to create a FollowCamera for.")
             return
 
         follow_cam = core.create_follow_camera()

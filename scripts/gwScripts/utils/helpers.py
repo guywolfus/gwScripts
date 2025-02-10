@@ -2,12 +2,8 @@
 import os
 import platform
 import subprocess
-import logging
 
 import maya.cmds as cmds
-
-
-LOGGER = logging.getLogger("gwScripts")
 
 
 def open_dir(dir_path):

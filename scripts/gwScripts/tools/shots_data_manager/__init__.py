@@ -1,5 +1,6 @@
 
-from .ui.window import Window
+from gwScripts.tools.shots_data_manager.ui.window import Window
+from gwScripts.tools.shots_data_manager.ui.controller import Controller
 
 import sys
 
@@ -22,6 +23,6 @@ def run(reset=False):
         self.window = None
 
     if not self.window:
-        self.window = Window()
+        self.window = Window(controller=Controller)
 
     self.window.display_ui()

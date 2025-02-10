@@ -1,10 +1,9 @@
 
+from gwScripts.tools.shots_data_manager.core.shots import Shots
 from gwScripts import utils
 
 import json
 from collections import OrderedDict
-
-from .shots import Shots
 
 
 # define basestring for string input guard clauses
@@ -147,7 +146,7 @@ class Preset(OrderedDict):
                 json.dump(self, f, indent=2)
             return True
         except IOError as e:
-            utils.general.LOGGER.error("Failed to save preset to '{}': {}.".format(self.file_path, e))
+            utils.LOGGER.error("Failed to save preset to '{}': {}.".format(self.file_path, e))
             return False
 
     @classmethod
@@ -163,9 +162,9 @@ class Preset(OrderedDict):
             with open(file_path, 'r') as f:
                 loaded_data = json.load(f, object_pairs_hook=OrderedDict)
         except IOError:
-            utils.general.LOGGER.error("Preset file not found at '{}'.".format(file_path))
+            utils.LOGGER.error("Preset file not found at '{}'.".format(file_path))
         except ValueError:
-            utils.general.LOGGER.error("Error decoding JSON from preset file at '{}'.".format(file_path))
+            utils.LOGGER.error("Error decoding JSON from preset file at '{}'.".format(file_path))
 
         preset = cls(file_path)
         preset.update(loaded_data)

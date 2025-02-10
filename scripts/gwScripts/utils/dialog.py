@@ -2,7 +2,7 @@
 import os
 import json
 
-from . import general
+from gwScripts.utils import LOGGER, helpers
 
 import maya.cmds as cmds
 from maya.app.general.mayaMixin import MayaQWidgetDockableMixin
@@ -50,7 +50,7 @@ class Dialog(MayaQWidgetDockableMixin, QtWidgets.QDialog):
         self.settings = settings if settings else self._default_settings
 
         # sets the dialog object properly via mayaMixin functionality
-        self.setObjectName(general.validate_string(self.settings.get('tool_name')))
+        self.setObjectName(helpers.validate_string(self.settings.get('tool_name')))
 
         # dialog properties
         self.setWindowTitle(self.settings.get('tool_name'))
@@ -164,7 +164,7 @@ class Dialog(MayaQWidgetDockableMixin, QtWidgets.QDialog):
         :return: None
         :rtype: None
         """
-        general.LOGGER.info(message)
+        LOGGER.info(message)
         QtWidgets.QMessageBox.information(self, title, message,
             QtWidgets.QMessageBox.Ok, QtWidgets.QMessageBox.Ok)
 
@@ -179,7 +179,7 @@ class Dialog(MayaQWidgetDockableMixin, QtWidgets.QDialog):
         :rtype: bool
         """
         if not disable_warning:
-            general.LOGGER.warning(message)
+            LOGGER.warning(message)
         dialog = QtWidgets.QMessageBox.warning(self, title, message,
             QtWidgets.QMessageBox.Ok|QtWidgets.QMessageBox.Cancel, QtWidgets.QMessageBox.Cancel)
         if dialog == QtWidgets.QMessageBox.StandardButton.FirstButton:
