@@ -1,9 +1,6 @@
 
 import os
-import logging
 
-
-LOGGER = logging.getLogger("gwScripts")
 
 __all__ = []
 for file_name in os.listdir(os.path.dirname(__file__)):

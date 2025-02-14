@@ -2,6 +2,7 @@
 import os
 import platform
 import subprocess
+import logging
 
 import maya.cmds as cmds
 
@@ -48,3 +49,23 @@ def undo_chunk(func):
         cmds.undoInfo(closeChunk=True, chunkName=func.__name__)
         return result
     return func_call
+
+def get_title(string):
+    """
+    Convert a "snake_case" string to a TitleCase string.
+
+    :arg str name: The input string in "snake_case" format.
+    :return: The converted string in "TitleCase" format.
+    :rtype: str
+    """
+    return "".join(word.capitalize() for word in string.split("_"))
+
+def get_maya_default_logger():
+    """
+    Retrieve Maya's default logger instance.
+
+    :return: The logger for Maya's default logging system.
+    :rtype: logging.Logger
+    """
+    maya_logger_name = cmds.internalVar('MAYA_DEFAULT_LOGGER_NAME')
+    return logging.getLogger(maya_logger_name)

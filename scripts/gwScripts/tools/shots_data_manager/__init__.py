@@ -1,12 +1,14 @@
 
 from gwScripts.tools.shots_data_manager.ui.window import Window
 from gwScripts.tools.shots_data_manager.ui.controller import Controller
+from gwScripts.utils import logutil
 
 import sys
 
 
 # maintains a reference to the currently-active window
 self = sys.modules[__name__]
+self.logger = logutil.get_logger(__name__, __file__)
 self.window = None
 
 
@@ -23,6 +25,6 @@ def run(reset=False):
         self.window = None
 
     if not self.window:
-        self.window = Window(controller=Controller)
+        self.window = Window(controller=Controller, logger=self.logger)
 
     self.window.display_ui()

@@ -1,6 +1,5 @@
 
 from gwScripts.tools.shots_data_manager.core.shots import Shots
-from gwScripts import utils
 
 import json
 from collections import OrderedDict
@@ -139,15 +138,14 @@ class Preset(OrderedDict):
         Save the preset into the preset's `file_path`.
 
         :return: Whether the operation succeeded or not.
-        :rtype: bool
+        :rtype: tuple[bool, None | tuple[str, IOError]]
         """
         try:
             with open(self.file_path, 'w') as f:
                 json.dump(self, f, indent=2)
-            return True
+            return True, None
         except IOError as e:
-            utils.LOGGER.error("Failed to save preset to '{}': {}.".format(self.file_path, e))
-            return False
+            return False, (self.file_path, e)
 
     @classmethod
     def load(cls, file_path):
@@ -156,15 +154,10 @@ class Preset(OrderedDict):
         Load the preset from the given `file_path`.
 
         :return: A preset object with the loaded data from `file_path`.
-        :rtype: `Preset` | None
+        :rtype: Preset
         """
-        try:
-            with open(file_path, 'r') as f:
-                loaded_data = json.load(f, object_pairs_hook=OrderedDict)
-        except IOError:
-            utils.LOGGER.error("Preset file not found at '{}'.".format(file_path))
-        except ValueError:
-            utils.LOGGER.error("Error decoding JSON from preset file at '{}'.".format(file_path))
+        with open(file_path, 'r') as f:
+            loaded_data = json.load(f, object_pairs_hook=OrderedDict)
 
         preset = cls(file_path)
         preset.update(loaded_data)

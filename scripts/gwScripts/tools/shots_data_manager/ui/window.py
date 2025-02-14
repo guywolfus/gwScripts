@@ -1,7 +1,8 @@
 
 from gwScripts.tools.shots_data_manager.core.preset import Preset
 from gwScripts.tools.shots_data_manager.core.widgets import NumericDelegate, Table
-from gwScripts import utils
+from gwScripts.utils.dialog import Dialog
+from gwScripts.utils.helpers import open_dir, validate_string
 
 import os
 
@@ -17,7 +18,7 @@ except:
     from PySide2.QtWidgets import QAction
 
 
-class Window(utils.dialog.Dialog):
+class Window(Dialog):
     """
     A handy tool for Maya that allows splitting a scene into several
     other scenes, mainly envisioned to be used on a layout scene
@@ -27,7 +28,7 @@ class Window(utils.dialog.Dialog):
     _preset_path = ""
     _export_path = ""
 
-    def __init__(self, parent=None, controller=None):
+    def __init__(self, parent=None, controller=None, logger=None):
         """
         Initializes the dialog.
 
@@ -37,7 +38,7 @@ class Window(utils.dialog.Dialog):
         :return: None
         :rtype: None
         """
-        super(Window, self).__init__(parent, settings=self.load_settings(__file__))
+        super(Window, self).__init__(parent, settings=self.load_settings(__file__), logger=logger)
         self.controller = controller
 
         # initialize shots data
@@ -281,7 +282,7 @@ class Window(utils.dialog.Dialog):
         self._preset_path = save_path[0]
 
         # build the preset data
-        preset = Preset(self, self._preset_path)
+        preset = Preset(self._preset_path)
         preset.shots = self.shots_data_table.shots_data
         preset.rename_shots_name = self.rename_shots_name_edt.text()
         preset.rename_shots_start_num = self.rename_shots_num_start_spnbox.value()
@@ -291,7 +292,10 @@ class Window(utils.dialog.Dialog):
         preset.normalize = self.settings_normalize_frames_ckb.isChecked()
         preset.normalize_frame = self.settings_normalize_frames_spnbox.value()
         preset.save_as = 'ma' if self.settings_filetype_ma_radbtn.isChecked() else 'mb'
-        preset.save()
+        save, args = preset.save()
+        if not save:
+            self.logger.error(self.settings.get('save_preset_io_error') + " \"{}\".".format(args[0]))
+            self.logger.error(args[1])
 
         # confirmation
         self.info_dialog(title="Done!", message=self.settings.get('preset_saved_confirm'))
@@ -313,14 +317,22 @@ class Window(utils.dialog.Dialog):
                 return
             self._preset_path = load_path[0]
 
-            preset = Preset.load(self, self._preset_path)
+            try:
+                preset = Preset.load(self._preset_path)
+            except IOError:
+                self.logger.error(self.settings.get('load_preset_file_not_found_error') + "\"{}\".".format(self._preset_path))
+                return
+            except ValueError:
+                self.logger.error(self.settings.get('load_preset_json_decode_error') + "\"{}\".".format(self._preset_path))
+                return
 
         # populate the table based on the preset
         try:
             self.shots_data_table.populate(preset.shots)
         except Exception as e:
-            utils.LOGGER.error(e)
-            utils.LOGGER.error(self.settings.get('load_preset_shots_data_error'))
+            self.logger.error(e)
+            self.logger.error(self.settings.get('load_preset_shots_data_error'))
+            return
 
         # set the GUI fields to match the preset
         self.rename_shots_name_edt.setText(preset.rename_shots_name)
@@ -349,10 +361,10 @@ class Window(utils.dialog.Dialog):
         :rtype: None
         """
         if not cmds.ls(sl=True):
-            utils.LOGGER.error(self.settings.get('no_object_selected_error') + self.settings.get('select_keyframes_error'))
+            self.logger.error(self.settings.get('no_object_selected_error') + self.settings.get('select_keyframes_error'))
             return
         if not self.controller.get_keys_on_selected():
-            utils.LOGGER.error(self.settings.get('no_keyframes_error') + self.settings.get('select_keyframes_error'))
+            self.logger.error(self.settings.get('no_keyframes_error') + self.settings.get('select_keyframes_error'))
             return
 
         if self.shots_data_table.shots_data and not self.confirmation_dialog(
@@ -443,14 +455,17 @@ class Window(utils.dialog.Dialog):
 
             if not main_file == cmds.file(q=True, sn=True):
                 cmds.file(main_file, force=True, loadReferenceDepth="all")
-            self.controller.apply_shot(start_frame, end_frame, normalize)
+            failed_anim_curves = self.controller.apply_shot(start_frame, end_frame, normalize)
+            if failed_anim_curves:
+                for anim_curve in failed_anim_curves:
+                    self.logger.warning("Skipping \"{}\": ".format(anim_curve) + self.settings.get('failed_anim_curve_warning'))
             cmds.file(rename=os.path.join(self._export_path, shot_name))
             cmds.file(save=True, force=True, type=save_as_filetype)
 
         # finalize
         cmds.file(main_file, force=True, loadReferenceDepth="all")
-        utils.helpers.open_dir(self._export_path)
-        utils.LOGGER.info(self.settings.get('export_shots_confirm'))
+        open_dir(self._export_path)
+        self.logger.info(self.settings.get('export_shots_confirm'))
 
     def _update_shot_name_display(self):
         """
@@ -469,11 +484,11 @@ class Window(utils.dialog.Dialog):
         try:
             self.rename_shots_apply_lbl.setText("e.g. \"{}\", \"{}\", \"{}\"...".format(eg1, eg2, eg3))
             if self._unicode_error:
-                utils.LOGGER.info("")
+                print("")
                 self._unicode_error = False
         except UnicodeEncodeError:
             if not self._unicode_error:
-                utils.LOGGER.error(self.settings.get('shot_name_display_error'))
+                self.logger.error(self.settings.get('shot_name_display_error'))
                 self._unicode_error = True
 
     def _update_normalize_frames(self):
@@ -514,7 +529,7 @@ class Window(utils.dialog.Dialog):
         """
         Internal for valid shots' naming conventions.
         """
-        name = utils.helpers.validate_string(
+        name = validate_string(
             input_str=self.rename_shots_name_edt.text(),
             replace_with="_"
         )

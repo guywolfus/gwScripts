@@ -1,6 +1,7 @@
 
 from gwScripts.tools.comet_rename_plus import core
-from gwScripts import utils
+from gwScripts.utils.dialog import Dialog
+from gwScripts.utils.helpers import undo_chunk
 
 import maya.cmds as cmds
 
@@ -14,13 +15,13 @@ except:
     from PySide2 import QtWidgets
 
 
-class Window(utils.dialog.Dialog):
+class Window(Dialog):
     """
     A simple renaming GUI utility that helps with
     batch name manipulation for Maya nodes.
     """
 
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, logger=None):
         """
         Initializes the dialog.
 
@@ -29,7 +30,9 @@ class Window(utils.dialog.Dialog):
         :return: None
         :rtype: None
         """
-        super(Window, self).__init__(parent, settings=self.load_settings(__file__), init_actions=False)
+        super(Window, self).__init__(parent,
+            settings=self.load_settings(__file__), logger=logger, init_actions=False
+        )
 
     def create_widgets(self):
         """
@@ -149,7 +152,7 @@ class Window(utils.dialog.Dialog):
             hlayout.addStretch()
         return hlayout
 
-    @utils.helpers.undo_chunk
+    @undo_chunk
     def add_prefix(self):
         """
         Adds the prefix text to the selected nodes.
@@ -159,14 +162,14 @@ class Window(utils.dialog.Dialog):
         """
         prefix = self.lnedit_prefix.text()
         if not prefix:
-            utils.LOGGER.warning(self.settings.get('prefix_missing_warning'))
+            self.logger.warning(self.settings.get('prefix_missing_warning'))
             return
         if not cmds.ls(sl=True):
-            utils.LOGGER.warning(self.settings.get('no_objects_selected_warning'))
+            self.logger.warning(self.settings.get('no_objects_selected_warning'))
             return
         core.add_prefix(prefix)
 
-    @utils.helpers.undo_chunk
+    @undo_chunk
     def add_suffix(self):
         """
         Adds the suffix text to the selected nodes.
@@ -176,14 +179,14 @@ class Window(utils.dialog.Dialog):
         """
         suffix = self.lnedit_suffix.text()
         if not suffix:
-            utils.LOGGER.warning(self.settings.get('suffix_missing_warning'))
+            self.logger.warning(self.settings.get('suffix_missing_warning'))
             return
         if not cmds.ls(sl=True):
-            utils.LOGGER.warning(self.settings.get('no_objects_selected_warning'))
+            self.logger.warning(self.settings.get('no_objects_selected_warning'))
             return
         core.add_suffix(suffix)
 
-    @utils.helpers.undo_chunk
+    @undo_chunk
     def search_and_replace(self):
         """
         Searches and replaces the texts for the selected nodes.
@@ -194,14 +197,14 @@ class Window(utils.dialog.Dialog):
         search = self.lnedit_search.text()
         replace = self.lnedit_replace.text()
         if not search:
-            utils.LOGGER.error(self.settings.get('search_missing_error'))
+            self.logger.error(self.settings.get('search_missing_error'))
             return
         if not cmds.ls(sl=True):
-            utils.LOGGER.warning(self.settings.get('no_objects_selected_warning'))
+            self.logger.warning(self.settings.get('no_objects_selected_warning'))
             return
         core.search_and_replace(search, replace)
 
-    @utils.helpers.undo_chunk
+    @undo_chunk
     def rename_and_number(self):
         """
         Renames and renumbers the selected nodes.
@@ -211,10 +214,10 @@ class Window(utils.dialog.Dialog):
         """
         new_name = self.lnedit_rename.text()
         if not new_name:
-            utils.LOGGER.warning(self.settings.get('name_name_missing_warning'))
+            self.logger.warning(self.settings.get('name_name_missing_warning'))
             return
         if not cmds.ls(sl=True):
-            utils.LOGGER.warning(self.settings.get('no_objects_selected_warning'))
+            self.logger.warning(self.settings.get('no_objects_selected_warning'))
             return
         start_num = int(self.lnedit_start_num.text())
         padding = int(self.lnedit_padding.text())

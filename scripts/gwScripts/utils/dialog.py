@@ -1,8 +1,8 @@
 
+from gwScripts.utils.helpers import validate_string, get_maya_default_logger
+
 import os
 import json
-
-from gwScripts.utils import LOGGER, helpers
 
 import maya.cmds as cmds
 from maya.app.general.mayaMixin import MayaQWidgetDockableMixin
@@ -24,7 +24,7 @@ class Dialog(MayaQWidgetDockableMixin, QtWidgets.QDialog):
         'window_height': 450
     }
 
-    def __init__(self, parent=None, settings=None,
+    def __init__(self, parent=None, settings=None, logger=None,
                  init_actions=True, init_widgets=True, init_layouts=True, init_connections=True
         ):
         """
@@ -48,9 +48,10 @@ class Dialog(MayaQWidgetDockableMixin, QtWidgets.QDialog):
         """
         super(Dialog, self).__init__(parent)
         self.settings = settings if settings else self._default_settings
+        self.logger = logger if logger else get_maya_default_logger()
 
         # sets the dialog object properly via mayaMixin functionality
-        self.setObjectName(helpers.validate_string(self.settings.get('tool_name')))
+        self.setObjectName(validate_string(self.settings.get('tool_name')))
 
         # dialog properties
         self.setWindowTitle(self.settings.get('tool_name'))
@@ -164,7 +165,7 @@ class Dialog(MayaQWidgetDockableMixin, QtWidgets.QDialog):
         :return: None
         :rtype: None
         """
-        LOGGER.info(message)
+        self.logger.info(message)
         QtWidgets.QMessageBox.information(self, title, message,
             QtWidgets.QMessageBox.Ok, QtWidgets.QMessageBox.Ok)
 
@@ -179,7 +180,7 @@ class Dialog(MayaQWidgetDockableMixin, QtWidgets.QDialog):
         :rtype: bool
         """
         if not disable_warning:
-            LOGGER.warning(message)
+            self.logger.warning(message)
         dialog = QtWidgets.QMessageBox.warning(self, title, message,
             QtWidgets.QMessageBox.Ok|QtWidgets.QMessageBox.Cancel, QtWidgets.QMessageBox.Cancel)
         if dialog == QtWidgets.QMessageBox.StandardButton.FirstButton:

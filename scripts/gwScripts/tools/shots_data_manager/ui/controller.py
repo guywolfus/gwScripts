@@ -1,6 +1,5 @@
 
 from gwScripts.tools.shots_data_manager.core.shots import Shots
-from gwScripts import utils
 
 import maya.cmds as cmds
 
@@ -48,8 +47,8 @@ class Controller():
         :arg int start_frame: The start frame of the shot.
         :arg int end_frame: The end frame of the shot.
         :arg int normalize: The normalization value by which to push all the keyframes back.
-        :return: None
-        :rtype: None
+        :return: List of curves that failed the keying operation, or empty list.
+        :rtype: list[str]
         """
         # query all anim curves and keyframe numbers in scene
         anim_curves = cmds.ls(type=['animCurveTL', 'animCurveTA', 'animCurveTT', 'animCurveTU'])
@@ -57,13 +56,14 @@ class Controller():
         anim_keyframes.sort()
 
         # create keys for all anim curves at the cut frames
+        failed_anim_curves = []
         for anim_curve in anim_curves:
             if cmds.referenceQuery(anim_curve, inr=True):
                 continue
             try:
                 cmds.setKeyframe(anim_curve, t=[start_frame, end_frame], itt='linear', ott='linear')
             except:
-                utils.LOGGER.warning("Skipping \"{}\": couldn\'t set a keyframe on it.".format(anim_curve))
+                failed_anim_curves.append(anim_curve)
 
         # if needed, delete keys before and after the cut frames
         if anim_keyframes[0] < start_frame:
@@ -87,3 +87,5 @@ class Controller():
             min=adjusted_start_frame, ast=adjusted_start_frame,
             max=adjusted_end_frame, aet=adjusted_end_frame
         )
+
+        return failed_anim_curves
