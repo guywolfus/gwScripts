@@ -13,6 +13,7 @@ global proc installModule() {
         // define the ".mod" file path and content
         string $modFilePath = (`internalVar -userAppDir` + "modules/" + $moduleName + ".mod");
         string $modContent = "+ " + $moduleName + " 1.0 " + $scriptDir;
+        string $modContent = $modContent + "\nGWSCRIPTS_PACKAGE_PATH=" + $scriptDir;
 
         // verify the modules directory exists
         string $modulesDir = `dirname($modFilePath)`;

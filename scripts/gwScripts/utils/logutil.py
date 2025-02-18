@@ -8,8 +8,22 @@ import logging
 LOGGER_PREFIX = "gwScripts: "
 
 
+def _get_file_handler(log_filename, log_dirpath, mode='w'):
+    filepath = os.path.join(log_dirpath, log_filename)
+    handler = logging.FileHandler(filepath, mode=mode)
+    handler.setLevel(logging.DEBUG)
+    handler.setFormatter(logging.Formatter(
+        "(%(asctime)s) %(levelname)s: %(message)s",
+        datefmt='%Y-%m-%d %H:%M:%S'
+    ))
+    return handler
+
 def get_logger(module_name, module_filepath=None):
     """
+    Retrieves a logger with several handlers; one for display
+    in Maya's Script Editor, another for logging to the package's
+    "main" log file, and possibly a third to a specified file path.
+
     :arg str name: Expects to use the plug-in/tool `__name__`.
     :arg str file: Expects to use the plug-in/tool `__file__`.
         Defaults to `None`, in which case it will not use a FileHandler.
@@ -30,18 +44,28 @@ def get_logger(module_name, module_filepath=None):
     maya_gui_handler = get_maya_default_logger()
     logger.addHandler(maya_gui_handler)
 
-    # file handler
-    if module_filepath:
-        log_filename = module_basename + ".log"
-        log_dir_path = os.path.dirname(module_filepath)
-        log_filepath = os.path.join(log_dir_path, log_filename)
+    # package file handler
+    package_dir_path = os.environ.get("GWSCRIPTS_PACKAGE_PATH", "")
+    if package_dir_path:
+        package_file_handler = _get_file_handler(
+            log_filename = "gwScripts.log",
+            log_dirpath = package_dir_path
+        )
+        logger.addHandler(package_file_handler)
+    else:
+        logger.error("Failed to get the environment variable for the gwScripts' package base path.")
+        logger.warning("Skipping setting up the file handler for the package's logger.")
 
-        file_handler = logging.FileHandler(log_filepath, mode='w')
-        file_handler.setLevel(logging.DEBUG)
-        file_handler.setFormatter(logging.Formatter(
-            "(%(asctime)s) %(levelname)s: %(message)s",
-            datefmt='%Y-%m-%d %H:%M:%S'
-        ))
-        logger.addHandler(file_handler)
+    # module file handler
+    if module_filepath:
+        if os.path.isfile(module_filepath):
+            module_file_handler = _get_file_handler(
+                log_filename = module_basename + ".log",
+                log_dirpath = os.path.dirname(module_filepath)
+            )
+            logger.addHandler(module_file_handler)
+        else:
+            logger.error("Expected the following argument to be a file: {}".format(module_filepath))
+            logger.warning("Skipping setting up the file handler for the module's logger.")
 
     return logger
