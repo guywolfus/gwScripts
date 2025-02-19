@@ -1,9 +1,9 @@
 
-from gwScripts.utils.helpers import get_title
-
 import os
 import sys
 import importlib
+
+from gwScripts.utils.helpers import get_title
 
 
 self = sys.modules[__name__]

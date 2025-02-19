@@ -53,8 +53,8 @@
 
     "failed_anim_curve_warning" : "Failed to set a keyframe on curve.",
     "save_preset_io_error": "Failed to save preset to",
-    "load_preset_file_not_found_error": "Preset file not found: ",
-    "load_preset_json_decode_error": "Error decoding JSON from preset file: ",
+    "load_preset_file_not_found_error": "Preset file not found",
+    "load_preset_json_decode_error": "Error decoding JSON from preset file",
     "load_preset_shots_data_error": "Failed to load shots data from preset.",
     "no_object_selected_error": "No object selected. ",
     "no_keyframes_error": "Selected object has no keyframes. ",

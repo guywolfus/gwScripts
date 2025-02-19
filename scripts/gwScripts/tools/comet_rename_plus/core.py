@@ -21,7 +21,9 @@ def _shortname(longname):
     Given a flattened (full path) node name,
     extract the short name of that node.
 
-    :arg str longname: Unique flattened path of the node.
+    :param longname: Unique flattened path of the node.
+    :type longname: str
+
     :return: Short name, might not be unique.
     :rtype: str
     """
@@ -31,7 +33,9 @@ def add_prefix(prefix):
     """
     Adds the prefix text to the selected nodes.
 
-    :arg str prefix: Prefix string.
+    :param prefix: Prefix string.
+    :type prefix: str
+
     :return: None
     :rtype: None
     """
@@ -42,7 +46,9 @@ def add_suffix(suffix):
     """
     Adds the suffix text to the selected nodes.
 
-    :arg str suffix: Suffix string.
+    :param suffix: Suffix string.
+    :type suffix: str
+
     :return: None
     :rtype: None
     """
@@ -53,8 +59,12 @@ def search_and_replace(search, replace):
     """
     Searches and replaces the texts for the selected nodes.
 
-    :arg str search: Search string.
-    :arg str replace: Replace string.
+    :param search: Search string.
+    :type search: str
+
+    :param replace: Replace string.
+    :type replace: str
+
     :return: None
     :rtype: None
     """
@@ -65,9 +75,15 @@ def rename_and_number(new_name, start_num, padding):
     """
     Renames and renumbers the selected nodes.
 
-    :arg str new_name: The node's new name.
-    :arg int start_num: The starting number.
-    :arg int padding: Amount of padding to the numbering.
+    :param new_name: The node's new name.
+    :type new_name: str
+
+    :param start_num: The starting number.
+    :type start_num: int
+
+    :param padding: Amount of padding to the numbering.
+    :type padding: int
+
     :return: None
     :rtype: None
     """

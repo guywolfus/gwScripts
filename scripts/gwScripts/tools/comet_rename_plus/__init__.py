@@ -1,8 +1,8 @@
 
+import sys
+
 from gwScripts.tools.comet_rename_plus.ui.window import Window
 from gwScripts.utils import logutil
-
-import sys
 
 
 # maintains a reference to the currently-active window
@@ -15,7 +15,8 @@ def run(reset=False):
     """
     The entry point for the tool.
 
-    :arg bool reset: Resets the state of the tool.
+    :param reset: Resets the state of the tool.
+    :type reset: bool, optional
     :return: None
     :rtype: None
     """

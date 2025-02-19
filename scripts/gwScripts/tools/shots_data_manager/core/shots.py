@@ -14,11 +14,21 @@ class Shots(OrderedDict):
         """
         Inserts new shot information as a nested OrderedDict in the given row.
 
-        :arg int row: The number of the row in the dictionary (`self`) to add the new shot to.
-        :arg str shot_name: The name of the new shot.
-        :arg int start_frame: The start frame of the new shot.
-        :arg int end_frame: The end frame of the new shot.
-        :return: Modified `self` with the new shot information included in the given row.
+        :param row: The number of the row in the dictionary (`self`) to
+            add the new shot to.
+        :type row: int
+
+        :param shot_name: The name of the new shot.
+        :type shot_name: str
+
+        :param start_frame: The start frame of the new shot.
+        :type start_frame: int
+
+        :param end_frame: The end frame of the new shot.
+        :type end_frame: int
+
+        :return: Modified dictionary (`self`) with the new shot information
+            included in the given row.
         :rtype: Shots
         """
         self[row] = OrderedDict()
@@ -31,7 +41,9 @@ class Shots(OrderedDict):
         """
         Get a shot's name by row.
 
-        :arg int row: The row number.
+        :param row: The row number.
+        :type row: int
+
         :return: The shot's name.
         :rtype: str
         """
@@ -41,7 +53,9 @@ class Shots(OrderedDict):
         """
         Get a shot's start frame by row.
 
-        :arg int row: The row number.
+        :param row: The row number.
+        :type row: int
+
         :return: The shot's start frame.
         :rtype: int | float
         """
@@ -51,7 +65,9 @@ class Shots(OrderedDict):
         """
         Get a shot's end frame by row.
 
-        :arg int row: The row number.
+        :param row: The row number.
+        :type row: int
+
         :return: The shot's end frame.
         :rtype: int | float
         """

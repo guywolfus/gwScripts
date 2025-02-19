@@ -10,7 +10,10 @@ import maya.cmds as cmds
 def open_dir(dir_path):
     """
     Opens a directory path on any system.
-    :arg str dir_path: The path to open.
+
+    :param dir_path: The path to open.
+    :type dir_path: str
+
     :return: None
     :rtype: None
     """
@@ -25,9 +28,12 @@ def validate_string(input_str, replace_with=""):
     """
     Replaces invalid characters from a string.
 
-    :arg str input_str: Input string to validate.
-    :arg str replace_with: What to replace invalid characters with.
-        Defaults to an empty string.
+    :param input_str: Input string to validate.
+    :type input_str: str
+
+    :param replace_with: Replacement for invalid characters.
+    :type replace_with: str, optional
+
     :return: The valid manipulated string.
     :rtype: str
     """
@@ -39,7 +45,9 @@ def undo_chunk(func):
     """
     Decorator that wraps functions in a single undo chunk.
 
-    :arg Callable func: The function to run.
+    :param func: The function to run.
+    :type func: Callable
+
     :return: The result of the input function, wrapped as a callable.
     :rtype: Callable
     """
@@ -52,10 +60,12 @@ def undo_chunk(func):
 
 def get_title(string):
     """
-    Convert a "snake_case" string to a TitleCase string.
+    Convert a "snake_case" string to a "PascalCase" string.
 
-    :arg str name: The input string in "snake_case" format.
-    :return: The converted string in "TitleCase" format.
+    :param name: The input string in "snake_case" format.
+    :type name: str
+
+    :return: The converted string in "PascalCase" format.
     :rtype: str
     """
     return "".join(word.capitalize() for word in string.split("_"))
@@ -69,3 +79,19 @@ def get_maya_default_logger():
     """
     maya_logger_name = cmds.internalVar('MAYA_DEFAULT_LOGGER_NAME')
     return logging.getLogger(maya_logger_name)
+
+def unique_list(sequence, ordered=False):
+    """
+    Remove duplicates from a list, optionally sorting the result.  
+    
+    :param sequence: The input list to filter.
+    :type sequence: list
+
+    :param ordered: If True, return a sorted list. 
+    :type ordered: bool, optional
+
+    :return: A list with unique elements, sorted if `ordered` is True.
+    :rtype: list
+    """
+    unique = list(set(sequence))
+    return sorted(unique) if ordered else unique

@@ -1,8 +1,8 @@
 
-from gwScripts.tools.shots_data_manager.core.shots import Shots
-
 import json
 from collections import OrderedDict
+
+from gwScripts.tools.shots_data_manager.core.shots import Shots
 
 
 # define basestring for string input guard clauses

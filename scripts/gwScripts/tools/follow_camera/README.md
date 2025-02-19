@@ -6,7 +6,7 @@ Created by Guy Wolfus.
 In the script editor, use the following Python command:
 ```markdown
 from gwScripts.tools import FollowCamera
-FollowCamera.run()
+FollowCamera.toggle()
 ```
 
 ## License

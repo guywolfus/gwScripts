@@ -1,13 +1,7 @@
 
-from gwScripts.tools.shots_data_manager.core.preset import Preset
-from gwScripts.tools.shots_data_manager.core.widgets import NumericDelegate, Table
-from gwScripts.utils.dialog import Dialog
-from gwScripts.utils.helpers import open_dir, validate_string
-
 import os
 
 import maya.cmds as cmds
-
 try:
     from PySide6 import QtGui
     from PySide6 import QtWidgets
@@ -17,6 +11,11 @@ except:
     from PySide2 import QtWidgets
     from PySide2.QtWidgets import QAction
 
+from gwScripts.tools.shots_data_manager.core.preset import Preset
+from gwScripts.tools.shots_data_manager.core.widgets import NumericDelegate, Table
+from gwScripts.utils.dialog import Dialog
+from gwScripts.utils.helpers import open_dir, validate_string
+
 
 class Window(Dialog):
     """
@@ -24,27 +23,33 @@ class Window(Dialog):
     other scenes, mainly envisioned to be used on a layout scene
     in order to split it into numbered shots.
     """
-    _unicode_error = False
-    _preset_path = ""
-    _export_path = ""
-
     def __init__(self, parent=None, controller=None, logger=None):
         """
         Initializes the dialog.
 
-        :arg QtWidgets.QWidget parent: Optional. Use to parent the dialog to another widget.
-            Defaults to `None`.
-        :arg Controller controller: The controller for this window.
+        :param parent: Use to parent the dialog to another widget.
+        :type parent: QtWidgets.QWidget, optional
+
+        :param controller: The controller for this window.
+        :type controller: Controller, optional
+
+        :param logger: Pass a specific logger for the window.
+        :type logger: logging.Logger, optional
+
         :return: None
         :rtype: None
         """
         super(Window, self).__init__(parent, settings=self.load_settings(__file__), logger=logger)
         self.controller = controller
+        self._unicode_error = False
+        self._preset_path = ""
+        self._export_path = ""
 
         # initialize shots data
         start_frame = int(cmds.playbackOptions(q=True, min=True))
         end_frame = int(cmds.playbackOptions(q=True, max=True))
-        keys = self.controller.get_keys_on_selected() if cmds.ls(sl=True) else [start_frame, end_frame]
+        selection = cmds.ls(sl=True)
+        keys = self.controller.get_keys_on_selected() if selection else [start_frame, end_frame]
         self.shots_data_table.populate(self.controller.keys_to_shots_data(keys))
         self.shots_data_table.rename_shots(*self._shots_naming_convention)
 
@@ -88,67 +93,113 @@ class Window(Dialog):
         self.shots_data_table.setItemDelegateForColumn(1, numeric_delegate)
         self.shots_data_table.setItemDelegateForColumn(2, numeric_delegate)
 
-        self.shots_data_insert_row_btn = QtWidgets.QPushButton(self.settings.get('shots_data_insert_row'), self.shots_data_grpbox)
-        self.shots_data_remove_row_btn = QtWidgets.QPushButton(self.settings.get('shots_data_remove_row'), self.shots_data_grpbox)
-        self.shots_data_extract_btn = QtWidgets.QPushButton(self.settings.get('shots_data_extract'), self.shots_data_grpbox)
+        self.shots_data_insert_row_btn = QtWidgets.QPushButton(
+            self.settings.get('shots_data_insert_row'), self.shots_data_grpbox
+        )
+        self.shots_data_remove_row_btn = QtWidgets.QPushButton(
+            self.settings.get('shots_data_remove_row'), self.shots_data_grpbox
+        )
+        self.shots_data_extract_btn = QtWidgets.QPushButton(
+            self.settings.get('shots_data_extract'), self.shots_data_grpbox
+        )
         self.shots_data_extract_btn.setToolTip(self.settings.get('shots_data_extract_tooltip'))
         self.shots_data_extract_btn.setStatusTip(self.settings.get('shots_data_extract_tooltip'))
-        self.shots_data_clear_btn = QtWidgets.QPushButton(self.settings.get('shots_data_clear'), self.shots_data_grpbox)
+        self.shots_data_clear_btn = QtWidgets.QPushButton(
+            self.settings.get('shots_data_clear'), self.shots_data_grpbox
+        )
 
         # rename shots
-        self.rename_shots_grpbox = QtWidgets.QGroupBox(self.settings.get('rename_shots'), self)
+        self.rename_shots_grpbox = QtWidgets.QGroupBox(
+            self.settings.get('rename_shots'), self
+        )
 
-        self.rename_shots_name_lbl = QtWidgets.QLabel(self.settings.get('rename_shots_title'), self.rename_shots_grpbox)
+        self.rename_shots_name_lbl = QtWidgets.QLabel(
+            self.settings.get('rename_shots_title'), self.rename_shots_grpbox
+        )
         self.rename_shots_name_edt = QtWidgets.QLineEdit(self.rename_shots_grpbox)
-        self.rename_shots_name_edt.setText(self._scenename + self.settings.get('rename_shots_default_prefix'))
+        self.rename_shots_name_edt.setText(
+            self._scenename + self.settings.get('rename_shots_default_prefix')
+        )
 
-        self.rename_shots_num_start_lbl = QtWidgets.QLabel(self.settings.get('rename_shots_num_start'), self.rename_shots_grpbox)
+        self.rename_shots_num_start_lbl = QtWidgets.QLabel(
+            self.settings.get('rename_shots_num_start'), self.rename_shots_grpbox
+        )
         self.rename_shots_num_start_spnbox = QtWidgets.QSpinBox(self.rename_shots_grpbox)
-        self.rename_shots_num_start_spnbox.setMinimumWidth(self.settings.get('window_width') * 0.153)
-        self.rename_shots_num_start_spnbox.setMinimum(NumericDelegate.min_range)
-        self.rename_shots_num_start_spnbox.setMaximum(NumericDelegate.max_range)
-        self.rename_shots_num_start_spnbox.setProperty('value', self.settings.get('rename_shots_num_start_value'))
+        self.rename_shots_num_start_spnbox.setMinimumWidth(
+            self.settings.get('window_width') * 0.153
+        )
+        self.rename_shots_num_start_spnbox.setMinimum(NumericDelegate.MIN_RANGE)
+        self.rename_shots_num_start_spnbox.setMaximum(NumericDelegate.MAX_RANGE)
+        self.rename_shots_num_start_spnbox.setProperty(
+            'value', self.settings.get('rename_shots_num_start_value')
+        )
 
-        self.rename_shots_num_incr_lbl = QtWidgets.QLabel(self.settings.get('rename_shots_num_incr'), self.rename_shots_grpbox)
+        self.rename_shots_num_incr_lbl = QtWidgets.QLabel(
+            self.settings.get('rename_shots_num_incr'), self.rename_shots_grpbox
+        )
         self.rename_shots_num_incr_spnbox = QtWidgets.QSpinBox(self.rename_shots_grpbox)
         self.rename_shots_num_incr_spnbox.setMinimumWidth(self.settings.get('window_width') * 0.153)
-        self.rename_shots_num_incr_spnbox.setMinimum(NumericDelegate.base_range)
-        self.rename_shots_num_incr_spnbox.setMaximum(NumericDelegate.max_range)
-        self.rename_shots_num_incr_spnbox.setProperty('value', self.settings.get('rename_shots_num_incr_value'))
+        self.rename_shots_num_incr_spnbox.setMinimum(NumericDelegate.BASE_RANGE)
+        self.rename_shots_num_incr_spnbox.setMaximum(NumericDelegate.MAX_RANGE)
+        self.rename_shots_num_incr_spnbox.setProperty(
+            'value', self.settings.get('rename_shots_num_incr_value')
+        )
 
-        self.rename_shots_num_padd_lbl = QtWidgets.QLabel(self.settings.get('rename_shots_num_padd'), self.rename_shots_grpbox)
+        self.rename_shots_num_padd_lbl = QtWidgets.QLabel(
+            self.settings.get('rename_shots_num_padd'), self.rename_shots_grpbox
+        )
         self.rename_shots_num_padd_spnbox = QtWidgets.QSpinBox(self.rename_shots_grpbox)
         self.rename_shots_num_padd_spnbox.setMinimumWidth(self.settings.get('window_width') * 0.153)
-        self.rename_shots_num_padd_spnbox.setMinimum(len(str(NumericDelegate.base_range)))
-        self.rename_shots_num_padd_spnbox.setMaximum(len(str(NumericDelegate.max_range)))
-        self.rename_shots_num_padd_spnbox.setProperty('value', self.settings.get('rename_shots_num_padd_value'))
+        self.rename_shots_num_padd_spnbox.setMinimum(len(str(NumericDelegate.BASE_RANGE)))
+        self.rename_shots_num_padd_spnbox.setMaximum(len(str(NumericDelegate.MAX_RANGE)))
+        self.rename_shots_num_padd_spnbox.setProperty(
+            'value', self.settings.get('rename_shots_num_padd_value')
+        )
 
         self.rename_shots_apply_lbl = QtWidgets.QLabel("", self.rename_shots_grpbox)
         self.rename_shots_apply_lbl.setEnabled(False)
-        self.rename_shots_apply_btn = QtWidgets.QPushButton(self.settings.get('rename_shots_apply'), self.rename_shots_grpbox)
+        self.rename_shots_apply_btn = QtWidgets.QPushButton(
+            self.settings.get('rename_shots_apply'), self.rename_shots_grpbox
+        )
 
         # settings
         self.settings_grpbox = QtWidgets.QGroupBox(self.settings.get('settings_title'), self)
 
-        self.settings_export_path_lbl = QtWidgets.QLabel(self.settings.get('settings_export_path'), self.settings_grpbox)
+        self.settings_export_path_lbl = QtWidgets.QLabel(
+            self.settings.get('settings_export_path'), self.settings_grpbox
+        )
         self.settings_export_path_edt = QtWidgets.QLineEdit(self.settings_grpbox)
         self.settings_export_path_actn = self.settings_export_path_edt.addAction(
             QtGui.QIcon(":/browseFolder.png"),
             QtWidgets.QLineEdit.TrailingPosition
         )
 
-        self.settings_normalize_frames_ckb = QtWidgets.QCheckBox(self.settings.get('settings_normalize_frames'), self.settings_grpbox)
-        self.settings_normalize_frames_ckb.setToolTip(self.settings.get('settings_normalize_frames_tooltip'))
-        self.settings_normalize_frames_ckb.setStatusTip(self.settings.get('settings_normalize_frames_tooltip'))
+        self.settings_normalize_frames_ckb = QtWidgets.QCheckBox(
+            self.settings.get('settings_normalize_frames'), self.settings_grpbox
+        )
+        self.settings_normalize_frames_ckb.setToolTip(
+            self.settings.get('settings_normalize_frames_tooltip')
+        )
+        self.settings_normalize_frames_ckb.setStatusTip(
+            self.settings.get('settings_normalize_frames_tooltip')
+        )
         self.settings_normalize_frames_ckb.setChecked(True)
         self.settings_normalize_frames_spnbox = QtWidgets.QSpinBox(self.settings_grpbox)
-        self.settings_normalize_frames_spnbox.setMinimumWidth(self.settings.get('window_width') * 0.449)
-        self.settings_normalize_frames_spnbox.setMinimum(NumericDelegate.min_range)
-        self.settings_normalize_frames_spnbox.setMaximum(NumericDelegate.max_range)
+        self.settings_normalize_frames_spnbox.setMinimumWidth(
+            self.settings.get('window_width') * 0.449
+        )
+        self.settings_normalize_frames_spnbox.setMinimum(NumericDelegate.MIN_RANGE)
+        self.settings_normalize_frames_spnbox.setMaximum(NumericDelegate.MAX_RANGE)
 
-        self.settings_filetype_lbl = QtWidgets.QLabel(self.settings.get('settings_filetype'), self.settings_grpbox)
-        self.settings_filetype_ma_radbtn = QtWidgets.QRadioButton(self.settings.get('settings_filetype_ma'), self.settings_grpbox)
-        self.settings_filetype_mb_radbtn = QtWidgets.QRadioButton(self.settings.get('settings_filetype_mb'), self.settings_grpbox)
+        self.settings_filetype_lbl = QtWidgets.QLabel(
+            self.settings.get('settings_filetype'), self.settings_grpbox
+        )
+        self.settings_filetype_ma_radbtn = QtWidgets.QRadioButton(
+            self.settings.get('settings_filetype_ma'), self.settings_grpbox
+        )
+        self.settings_filetype_mb_radbtn = QtWidgets.QRadioButton(
+            self.settings.get('settings_filetype_mb'), self.settings_grpbox
+        )
         self.settings_filetype_ma_radbtn.setChecked(True)
         self.settings_filetype_radgrp = QtWidgets.QButtonGroup(self.settings_grpbox)
         self.settings_filetype_radgrp.addButton(self.settings_filetype_ma_radbtn)
@@ -163,7 +214,9 @@ class Window(Dialog):
         :rtype: None
         """
         def spacer_item(w=0, h=20):
-            return QtWidgets.QSpacerItem(w, h, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+            return QtWidgets.QSpacerItem(
+                w, h, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum
+            )
 
         # presets
         menu_bar = QtWidgets.QMenuBar(self)
@@ -276,7 +329,13 @@ class Window(Dialog):
         """
         # set the preset path
         preset_path = self._preset_path if self._preset_path else cmds.workspace(q=True, rd=True)
-        save_path = cmds.fileDialog2(ds=2, cap="Save Preset...", dir=preset_path, ff='Json (*.json)', fm=0)
+        save_path = cmds.fileDialog2(
+            dialogStyle=2,  # maya style, consistent across platforms
+            caption="Save Preset...",
+            startingDirectory=preset_path,
+            fileFilter='Json (*.json)',
+            fileMode=0  # any file, whether it exists or not
+        )
         if not save_path:
             return
         self._preset_path = save_path[0]
@@ -294,7 +353,9 @@ class Window(Dialog):
         preset.save_as = 'ma' if self.settings_filetype_ma_radbtn.isChecked() else 'mb'
         save, args = preset.save()
         if not save:
-            self.logger.error(self.settings.get('save_preset_io_error') + " \"{}\".".format(args[0]))
+            self.logger.error(
+                self.settings.get('save_preset_io_error') + " \"{}\".".format(args[0])
+            )
             self.logger.error(args[1])
 
         # confirmation
@@ -304,15 +365,24 @@ class Window(Dialog):
         """
         Loads a preset (Json) file into the GUI's shots data.
 
-        :arg dict preset: The preset to load (in JSON format) as a `Preset()` object.
-            Defaults to `None`.
+        :param preset: The preset to load (in JSON format) as a `Preset` object.
+        :type preset: dict, optional
+
         :return: None
         :rtype: None
         """
         # get the preset if not passed as an argument
         if not preset:
-            preset_path = self._preset_path if self._preset_path else cmds.workspace(q=True, rd=True)
-            load_path = cmds.fileDialog2(ds=2, cap="Load Preset...", dir=preset_path, ff='Json (*.json)', fm=1)
+            preset_path = (self._preset_path
+                           if self._preset_path
+                           else cmds.workspace(q=True, rd=True))
+            load_path = cmds.fileDialog2(
+                dialogStyle=2,  # maya style, consistent across platforms
+                caption="Load Preset...",
+                startingDirectory=preset_path,
+                fileFilter='Json (*.json)',
+                fileMode=1  # a single existing file
+            )
             if not load_path:
                 return
             self._preset_path = load_path[0]
@@ -320,10 +390,16 @@ class Window(Dialog):
             try:
                 preset = Preset.load(self._preset_path)
             except IOError:
-                self.logger.error(self.settings.get('load_preset_file_not_found_error') + "\"{}\".".format(self._preset_path))
+                self.logger.error("{}: \"{}\".".format(
+                    self.settings.get('load_preset_file_not_found_error'),
+                    self._preset_path
+                ))
                 return
             except ValueError:
-                self.logger.error(self.settings.get('load_preset_json_decode_error') + "\"{}\".".format(self._preset_path))
+                self.logger.error("{}: \"{}\".".format(
+                    self.settings.get('load_preset_json_decode_error'),
+                    self._preset_path
+                ))
                 return
 
         # populate the table based on the preset
@@ -342,8 +418,8 @@ class Window(Dialog):
         self.settings_export_path_edt.setText(preset.export_path)
         self.settings_normalize_frames_ckb.setChecked(preset.normalize)
         self.settings_normalize_frames_spnbox.setValue(preset.normalize_frame)
-        self.settings_filetype_ma_radbtn.setChecked(True if preset.save_as == 'ma' else False)
-        self.settings_filetype_mb_radbtn.setChecked(True if preset.save_as == 'mb' else False)
+        self.settings_filetype_ma_radbtn.setChecked(preset.save_as == 'ma')
+        self.settings_filetype_mb_radbtn.setChecked(preset.save_as == 'mb')
 
         # update the GUI info
         self._update_shot_name_display()
@@ -361,10 +437,16 @@ class Window(Dialog):
         :rtype: None
         """
         if not cmds.ls(sl=True):
-            self.logger.error(self.settings.get('no_object_selected_error') + self.settings.get('select_keyframes_error'))
+            self.logger.error("{}{}".format(
+                self.settings.get('no_object_selected_error'),
+                self.settings.get('select_keyframes_error')
+            ))
             return
         if not self.controller.get_keys_on_selected():
-            self.logger.error(self.settings.get('no_keyframes_error') + self.settings.get('select_keyframes_error'))
+            self.logger.error("{}{}".format(
+                self.settings.get('no_keyframes_error'),
+                self.settings.get('select_keyframes_error')
+            ))
             return
 
         if self.shots_data_table.shots_data and not self.confirmation_dialog(
@@ -407,13 +489,22 @@ class Window(Dialog):
 
     def browse_export_path(self):
         """
-        Prompts the user to browse and select a folder for the export path, and sets it in the GUI if selected.
+        Prompts the user to browse and select a folder for the export path,
+        and sets it in the GUI if selected.
 
         :return: None
         :rtype: None
         """
-        browse_path = self._export_path if os.path.exists(self._export_path) else cmds.workspace(q=True, rd=True)
-        selected_dir = cmds.fileDialog2(ds=2, cap="Select Directory...", dir=browse_path, fm=3)
+        browse_path = (self._export_path
+                       if os.path.exists(self._export_path)
+                       else cmds.workspace(q=True, rd=True))
+        selected_dir = cmds.fileDialog2(
+            dialogStyle=2,  # maya style, consistent across platforms
+            caption="Select Directory...",
+            startingDirectory=browse_path,
+            fileMode=3  # the name of a directory
+                        # only directories are displayed in the dialog
+        )
         if selected_dir:
             self.settings_export_path_edt.setText(selected_dir[0])
 
@@ -434,23 +525,32 @@ class Window(Dialog):
                 return
 
             if not cmds.file(q=True, sn=True):
-                browse_path = self._export_path if os.path.exists(self._export_path) else cmds.workspace(q=True, rd=True)
-                maya_filters = 'Maya ASCII (*.ma);;Maya Binary (*.mb)'
-                save_scene = cmds.fileDialog2(ds=2, cap="Save As", dir=browse_path, ff=maya_filters, fm=0)
+                browse_path = (self._export_path
+                               if os.path.exists(self._export_path)
+                               else cmds.workspace(q=True, rd=True))
+                save_scene = cmds.fileDialog2(
+                    dialogStyle=2,  # maya style, consistent across platforms
+                    caption="Save As",
+                    startingDirectory=browse_path,
+                    fileFilter="Maya ASCII (*.ma);;Maya Binary (*.mb)",
+                    fileMode=0  # any file, whether it exists or not
+                )
                 if not save_scene:
                     return
-                else:
-                    cmds.file(rename=save_scene[0])
+                cmds.file(rename=save_scene[0])
             cmds.file(save=True)
         main_file = cmds.file(q=True, sn=True)
 
         # determine attrs from window input
-        normalize = self.settings_normalize_frames_spnbox.value() if self.settings_normalize_frames_ckb.isChecked() else None
-        save_as_filetype = 'mayaAscii' if self.settings_filetype_ma_radbtn.isChecked() else 'mayaBinary'
+        normalize = (self.settings_normalize_frames_spnbox.value()
+                     if self.settings_normalize_frames_ckb.isChecked()
+                     else None)
+        save_as_filetype = ('mayaAscii'
+                            if self.settings_filetype_ma_radbtn.isChecked()
+                            else 'mayaBinary')
 
         # run the export operation
-        for i in range(len(self.shots_data_table.shots_data)):
-            shot_data = self.shots_data_table.shots_data[i]
+        for shot_data in self.shots_data_table.shots_data.values():
             shot_name, start_frame, end_frame = shot_data.values()
 
             if not main_file == cmds.file(q=True, sn=True):
@@ -458,7 +558,9 @@ class Window(Dialog):
             failed_anim_curves = self.controller.apply_shot(start_frame, end_frame, normalize)
             if failed_anim_curves:
                 for anim_curve in failed_anim_curves:
-                    self.logger.warning("Skipping \"{}\": ".format(anim_curve) + self.settings.get('failed_anim_curve_warning'))
+                    self.logger.warning("Skipping \"{}\": {}".format(
+                        anim_curve, self.settings.get('failed_anim_curve_warning')
+                    ))
             cmds.file(rename=os.path.join(self._export_path, shot_name))
             cmds.file(save=True, force=True, type=save_as_filetype)
 
@@ -482,7 +584,9 @@ class Window(Dialog):
         eg3 = name + str(start + incr*2).zfill(padd)
 
         try:
-            self.rename_shots_apply_lbl.setText("e.g. \"{}\", \"{}\", \"{}\"...".format(eg1, eg2, eg3))
+            self.rename_shots_apply_lbl.setText(
+                "e.g. \"{}\", \"{}\", \"{}\"...".format(eg1, eg2, eg3)
+            )
             if self._unicode_error:
                 print("")
                 self._unicode_error = False
@@ -498,7 +602,9 @@ class Window(Dialog):
         :return: None
         :rtype: None
         """
-        self.settings_normalize_frames_spnbox.setEnabled(self.settings_normalize_frames_ckb.isChecked())
+        self.settings_normalize_frames_spnbox.setEnabled(
+            self.settings_normalize_frames_ckb.isChecked()
+        )
 
     def _update_export_path(self):
         """

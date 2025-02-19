@@ -1,9 +1,9 @@
 
+import sys
+
 from gwScripts.tools.shots_data_manager.ui.window import Window
 from gwScripts.tools.shots_data_manager.ui.controller import Controller
 from gwScripts.utils import logutil
-
-import sys
 
 
 # maintains a reference to the currently-active window
@@ -16,7 +16,9 @@ def run(reset=False):
     """
     The entry point for the tool.
 
-    :arg bool reset: Resets the state of the tool.
+    :param reset: Resets the state of the tool.
+    :type reset: bool
+
     :return: None
     :rtype: None
     """

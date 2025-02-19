@@ -20,13 +20,14 @@ class _Camera:
 def get_follow_camera():
     """
     :return: A camera object in the scene that has the
-    custom follow attribute, or None if not found.
+        custom follow attribute, or None if not found.
     :rtype: _Camera | None
     """
     for cam_shape in cmds.ls(type='camera'):
         if cmds.attributeQuery(ATTR, node=cam_shape, exists=True):
             cam_transform = cmds.listRelatives(cam_shape, parent=True)
             return _Camera(cam_transform, cam_shape)
+    return None
 
 
 def create_follow_camera():
@@ -49,7 +50,9 @@ def frame_camera(cam, active_cam):
     Frames the camera around the selected object in the scene,
     taking the current active camera angle into consideration.
 
-    :arg _Camera cam: The camera to frame.
+    :param cam: The camera to use for framing.
+    :type cam: _Camera
+
     :return: None
     :rtype: None
     """
@@ -62,8 +65,12 @@ def constraint_camera(cam, selection):
     """
     Creates a constraint setup for the camera based on the selected object in the scene.
     
-    :arg _Camera cam: The camera to create the constraint setup for.
-    :arg str selection: The name of the object to use for the constraint.
+    :param cam: The camera to create the constraint setup for.
+    :type cam: _Camera
+
+    :param selection: The name of the object to use for the constraint.
+    :type selection: str
+
     :return: None
     :rtype: None
     """
@@ -79,7 +86,7 @@ def delete_follow_camera():
     """
     Deletes all camera and transform nodes in the scene
     that have the follow camera attribute.
-    
+
     :return: None
     :rtype: None
     """

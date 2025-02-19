@@ -1,24 +1,22 @@
 
-from gwScripts.utils.helpers import validate_string, get_maya_default_logger
-
 import os
 import json
 
 import maya.cmds as cmds
 from maya.app.general.mayaMixin import MayaQWidgetDockableMixin
-
 try:
     from PySide6 import QtWidgets
 except:
     from PySide2 import QtWidgets
+
+from gwScripts.utils.helpers import validate_string, get_maya_default_logger
 
 
 class Dialog(MayaQWidgetDockableMixin, QtWidgets.QDialog):
     """
     Base dialog class for GW tools and scripts.
     """
-    _undocked_size = None
-    _default_settings = {
+    _DEFAULT_SETTINGS = {
         'tool_name': "Dialog",
         'window_width': 300,
         'window_height': 450
@@ -30,25 +28,35 @@ class Dialog(MayaQWidgetDockableMixin, QtWidgets.QDialog):
         """
         Initializes the dialog.
 
-        :arg QtWidgets.QWidget parent: Optional. Use to parent the dialog to another widget.
-            Defaults to `None`.
-        :arg dict settings: Optional. Pass a dictionary of settings to the dialog
+        :param parent: Use to parent the dialog to another widget.
+        :type parent: QtWidgets.QWidget, optional
+
+        :param settings: Pass a dictionary of settings to the dialog
             such as 'tool_name', 'window_width' and 'window_height'.
-            Defaults to `None`.
-        :arg bool init_actions: Optional. Whether to initialize the window's actions.
-            Defaults to `True`.
-        :arg bool init_widgets: Optional. Whether to initialize the window's widgets.
-            Defaults to `True`.
-        :arg bool init_layouts: Optional. Whether to initialize the window's layouts.
-            Defaults to `True`.
-        :arg bool init_connections: Optional. Whether to initialize the window's connections.
-            Defaults to `True`.
+        :type settings: dict, optional
+
+        :param logger: Pass a specific logger for the window.
+        :type logger: logging.Logger, optional
+
+        :param init_actions: Whether to initialize the window's actions.
+        :type init_actions: bool, optional
+
+        :param init_widgets: Whether to initialize the window's widgets.
+        :type init_widgets: bool, optional
+
+        :param init_layouts: Whether to initialize the window's layouts.
+        :type init_layouts: bool, optional
+
+        :param init_connections: Whether to initialize the window's connections.
+        :type init_connections: bool, optional
+
         :return: None
         :rtype: None
         """
         super(Dialog, self).__init__(parent)
-        self.settings = settings if settings else self._default_settings
+        self.settings = settings if settings else self._DEFAULT_SETTINGS
         self.logger = logger if logger else get_maya_default_logger()
+        self._undocked_size = None
 
         # sets the dialog object properly via mayaMixin functionality
         self.setObjectName(validate_string(self.settings.get('tool_name')))
@@ -117,7 +125,8 @@ class Dialog(MayaQWidgetDockableMixin, QtWidgets.QDialog):
         """
         if cmds.workspaceControl(self.workspace_control_name, exists=True):
             self.display_ui()
-            # force floating and closing the window before we reset, to avoid weird behavior on initialization
+            # force floating and closing the window before we reset,
+            # to avoid weird behavior on initialization
             cmds.workspaceControl(self.workspace_control_name, e=True, floating=True, close=True)
             cmds.deleteUI(self.workspace_control_name)
             return True
@@ -141,7 +150,9 @@ class Dialog(MayaQWidgetDockableMixin, QtWidgets.QDialog):
         Override of :meth:`MayaQWidgetDockableMixin.floatingChanged`.
         Resize the window on detect dock/undock events.
 
-        :arg bool isFloating: Whether the window is docked.
+        :param isFloating: Whether the window is docked.
+        :type isFloating: bool
+
         :return: None
         :rtype: None
         """
@@ -160,39 +171,57 @@ class Dialog(MayaQWidgetDockableMixin, QtWidgets.QDialog):
         """
         Prompt the user with an informative dialog. (e.g. if an operation was successfull or not)
 
-        :arg str title: The title of the dialog.
-        :arg str message: The text message of the dialog.
+        :param title: The title of the dialog.
+        :type title: str
+
+        :param message: The text message of the dialog.
+        :type message: str
+
         :return: None
         :rtype: None
         """
         self.logger.info(message)
-        QtWidgets.QMessageBox.information(self, title, message,
-            QtWidgets.QMessageBox.Ok, QtWidgets.QMessageBox.Ok)
+        QtWidgets.QMessageBox.information(
+            self, title, message,
+            QtWidgets.QMessageBox.Ok,
+            QtWidgets.QMessageBox.Ok
+        )
 
     def confirmation_dialog(self, title, message, disable_warning=False):
         """
         Prompt the user with a dialog that requires confirmation.
 
-        :arg str title: The title of the dialog.
-        :arg str message: The text message of the dialog.
-        :arg bool disable_warning: Disable displaying the warning sent to the Maya console.
+        :param title: The title of the dialog.
+        :type title: str
+
+        :param message: The text message of the dialog.
+        :type message: str
+
+        :param disable_warning: Disable displaying the warning sent to the Maya console.
+        :type disable_warning: bool
+
         :return: Whether the user confirmed the dialog.
         :rtype: bool
         """
         if not disable_warning:
             self.logger.warning(message)
-        dialog = QtWidgets.QMessageBox.warning(self, title, message,
-            QtWidgets.QMessageBox.Ok|QtWidgets.QMessageBox.Cancel, QtWidgets.QMessageBox.Cancel)
+        dialog = QtWidgets.QMessageBox.warning(
+            self, title, message,
+            QtWidgets.QMessageBox.Ok|QtWidgets.QMessageBox.Cancel,
+            QtWidgets.QMessageBox.Cancel
+        )
         if dialog == QtWidgets.QMessageBox.StandardButton.FirstButton:
             return True
         return False
 
-    @staticmethod
-    def load_settings(filepath):
+    def load_settings(self, filepath):
         """
         Load the 'settings.json' file in the same directory as the filepath.
 
-        :arg str filepath: The filepath to use in order to reach the directory of the 'settings.json' file.
+        :param filepath: The filepath to use in order to reach
+            the directory of the 'settings.json' file.
+        :type filepath: str
+
         :return: The loaded json file as a dictionary.
         :rtype: dict
         """
@@ -201,13 +230,18 @@ class Dialog(MayaQWidgetDockableMixin, QtWidgets.QDialog):
 
         # check if the file exists
         if not os.path.isfile(settings_path):
-            raise IOError("The 'settings.json' file does not exist in the script's directory.")
+            e = "The 'settings.json' file does not exist in the script's directory."
+            self.logger.error(e)
+            raise IOError(e)
 
         # open and load the JSON file
         with open(settings_path, 'r') as f:
             try:
                 settings = json.load(f)
-            except ValueError:
-                raise ValueError("Failed to parse 'settings.json'. Ensure it is a valid JSON file.")
+            except ValueError as e:
+                self.logger.error(
+                    "Failed to parse 'settings.json'. Ensure it is a valid JSON file."
+                )
+                raise e
 
         return settings

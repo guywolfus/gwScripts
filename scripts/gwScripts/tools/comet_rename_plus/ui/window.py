@@ -1,10 +1,5 @@
 
-from gwScripts.tools.comet_rename_plus import core
-from gwScripts.utils.dialog import Dialog
-from gwScripts.utils.helpers import undo_chunk
-
 import maya.cmds as cmds
-
 try:
     from PySide6 import QtCore
     from PySide6 import QtGui
@@ -13,6 +8,10 @@ except:
     from PySide2 import QtCore
     from PySide2 import QtGui
     from PySide2 import QtWidgets
+
+from gwScripts.tools.comet_rename_plus import core
+from gwScripts.utils.dialog import Dialog
+from gwScripts.utils.helpers import undo_chunk
 
 
 class Window(Dialog):
@@ -25,8 +24,12 @@ class Window(Dialog):
         """
         Initializes the dialog.
 
-        :arg QtWidgets.QWidget parent: Optional. Use to parent the dialog to another widget.
-            Defaults to `None`.
+        :param parent: Use to parent the dialog to another widget.
+        :type parent: QtWidgets.QWidget, optional
+
+        :param logger: Pass a specific logger for the window.
+        :type logger: logging.Logger, optional
+
         :return: None
         :rtype: None
         """
@@ -100,25 +103,39 @@ class Window(Dialog):
         self.main_layout.setSpacing(1)
 
         # replace
-        self.main_layout.addLayout(self._add_lnedit(self.settings.get('search'), self.lnedit_search))
-        self.main_layout.addLayout(self._add_lnedit(self.settings.get('replace'), self.lnedit_replace))
+        self.main_layout.addLayout(self._add_lnedit(
+            self.settings.get('search'), self.lnedit_search)
+        )
+        self.main_layout.addLayout(self._add_lnedit(
+            self.settings.get('replace'), self.lnedit_replace)
+        )
         self.main_layout.addWidget(self.btn_replace)
         self.main_layout.addWidget(add_line())
 
         # prefix
-        self.main_layout.addLayout(self._add_lnedit(self.settings.get('prefix'), self.lnedit_prefix))
+        self.main_layout.addLayout(self._add_lnedit(
+            self.settings.get('prefix'), self.lnedit_prefix)
+        )
         self.main_layout.addWidget(self.btn_prefix)
         self.main_layout.addWidget(add_line())
 
         # suffix
-        self.main_layout.addLayout(self._add_lnedit(self.settings.get('suffix'), self.lnedit_suffix))
+        self.main_layout.addLayout(self._add_lnedit(
+            self.settings.get('suffix'), self.lnedit_suffix)
+        )
         self.main_layout.addWidget(self.btn_suffix)
         self.main_layout.addWidget(add_line())
 
         # rename
-        self.main_layout.addLayout(self._add_lnedit(self.settings.get('rename'), self.lnedit_rename))
-        self.main_layout.addLayout(self._add_lnedit(self.settings.get('start_num'), self.lnedit_start_num, True))
-        self.main_layout.addLayout(self._add_lnedit(self.settings.get('padding'), self.lnedit_padding, True))
+        self.main_layout.addLayout(self._add_lnedit(
+            self.settings.get('rename'), self.lnedit_rename)
+        )
+        self.main_layout.addLayout(self._add_lnedit(
+            self.settings.get('start_num'), self.lnedit_start_num, True)
+        )
+        self.main_layout.addLayout(self._add_lnedit(
+            self.settings.get('padding'), self.lnedit_padding, True)
+        )
         self.main_layout.addWidget(self.btn_rename)
 
     def create_connections(self):
@@ -136,10 +153,18 @@ class Window(Dialog):
 
     def _add_lnedit(self, label_text, lnedit_widget, add_stretch=False):
         """
-        :arg str label_text:
-        :arg QtWidgets.QLineEdit lnedit_widget:
-        :arg bool add_stretch: Defaults to False.
-        :return: Layout of a label and a line edit widget.
+        Creates a horizontal layout with a label and a line edit widget.
+
+        :param label_text: The text for the label.
+        :type label_text: str
+
+        :param lnedit_widget: The line edit widget to insert.
+        :type lnedit_widget: QtWidgets.QLineEdit
+
+        :param add_stretch: Whether to add stretch space to the layout.
+        :type add_stretch: bool, optional
+
+        :return: A layout containing the label and the line edit.
         :rtype: QtWidgets.QHBoxLayout
         """
         label = QtWidgets.QLabel(label_text)

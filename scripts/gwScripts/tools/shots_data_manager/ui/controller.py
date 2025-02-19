@@ -1,7 +1,8 @@
 
-from gwScripts.tools.shots_data_manager.core.shots import Shots
-
 import maya.cmds as cmds
+
+from gwScripts.tools.shots_data_manager.core.shots import Shots
+from gwScripts.utils.helpers import unique_list
 
 
 class Controller:
@@ -12,9 +13,9 @@ class Controller:
     def get_keys_on_selected():
         """
         :return: The sorted list of keyframes on the currently selected objects.
-        :rtype: List[int]
+        :rtype: list[int]
         """
-        return list(sorted(set(cmds.keyframe(cmds.ls(sl=True)[-1], q=True))))
+        return unique_list(cmds.keyframe(cmds.ls(sl=True)[-1], q=True), ordered=True)
 
     @staticmethod
     def keys_to_shots_data(keys):
@@ -23,7 +24,9 @@ class Controller:
         that are split from one key until the next.
         e.g. keys = [0, 100, 250] will result in shots (0, 99) and (100, 249).
 
-        :arg list keys: List of integers representing keyframe numbers.
+        :param keys: List of integers representing keyframe numbers.
+        :type keys: list
+
         :return: The shots data, split on the given keyframes.
         :rtype: ShotsDataDict
         """
@@ -44,9 +47,15 @@ class Controller:
         """
         The shot manipulation operations, based on the shot data passed.
 
-        :arg int start_frame: The start frame of the shot.
-        :arg int end_frame: The end frame of the shot.
-        :arg int normalize: The normalization value by which to push all the keyframes back.
+        :param start_frame: The start frame of the shot.
+        :type start_frame: int
+
+        :param end_frame: The end frame of the shot.
+        :type end_frame: int
+
+        :param normalize: The normalization value by which to push all the keyframes back.
+        :type normalize: int
+
         :return: List of curves that failed the keying operation, or empty list.
         :rtype: list[str]
         """

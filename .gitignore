@@ -1,6 +1,12 @@
+# vscode
+.vscode
+
 # python
 __pycache__/
 *.pyc
+
+# linter
+*.pylintrc
 
 # logs
 *.log
