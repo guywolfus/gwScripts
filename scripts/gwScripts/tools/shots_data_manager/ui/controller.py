@@ -4,7 +4,7 @@ from gwScripts.tools.shots_data_manager.core.shots import Shots
 import maya.cmds as cmds
 
 
-class Controller():
+class Controller:
     """
     The controller for ShotsDataManager.
     """

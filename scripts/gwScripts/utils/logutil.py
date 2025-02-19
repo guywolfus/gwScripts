@@ -24,8 +24,8 @@ def get_logger(module_name, module_filepath=None):
     in Maya's Script Editor, another for logging to the package's
     "main" log file, and possibly a third to a specified file path.
 
-    :arg str name: Expects to use the plug-in/tool `__name__`.
-    :arg str file: Expects to use the plug-in/tool `__file__`.
+    :arg str name: Expects to use the plugin/tool `__name__`.
+    :arg str file: Expects to use the plugin/tool `__file__`.
         Defaults to `None`, in which case it will not use a FileHandler.
     :return: A dedicated Logger object.
     :rtype: logging.Logger

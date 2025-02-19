@@ -7,7 +7,7 @@ OFFSET = CAMERA + "_grp"
 ATTR = CAMERA + "Cam"
 
 
-class _Camera():
+class _Camera:
     """
     Private classification to be used throughout the script,
     packs the transform and shape nodes into one object.
